@@ -747,12 +747,20 @@ span.mobile-only { display: inline; }
 }
 .service-num { min-width: var(--service-num-width); color: #000; flex-shrink: 0; }
 .service-name { min-width: 0; }
+.service-body-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+.service-row.expanded .service-body-wrapper {
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0, 0, 0.2, 1);
+}
 .service-body {
-  max-height: 0;
+  min-height: 0;
+  overflow: hidden;
   opacity: 0;
-  overflow-y: hidden;
-  overflow-x: visible;
-  transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity var(--transition-slow), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.3s ease, padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--service-body-indent);
   padding-right: 0;
   padding-top: 0;
@@ -773,7 +781,6 @@ p.type-contact-item.service-description {
   margin-bottom: 0;
 }
 .service-row.expanded .service-body {
-  max-height: 1000px;
   opacity: 1;
   padding-top: var(--spacing-md);
   padding-bottom: var(--spacing-md);

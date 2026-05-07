@@ -231,27 +231,27 @@ async function init() {
   function updatePageTitle(page, slot) {
     const lang = (window.getCurrentLang && window.getCurrentLang()) || "en";
     const titlesEn = {
-      home:    "Julian Jakob — Global Brand Designer",
-      about:   "About — Julian Jakob",
-      process: "Process — Julian Jakob",
-      pricing: "Services — Julian Jakob",
-      contact: "Contact — Julian Jakob",
-      legal:   "Legal — Julian Jakob",
+      home:    "Julian Jakob | Global Brand Designer",
+      about:   "About | Julian Jakob",
+      process: "Process | Julian Jakob",
+      pricing: "Services | Julian Jakob",
+      contact: "Contact | Julian Jakob",
+      legal:   "Legal | Julian Jakob",
     };
     const titlesDe = {
-      home:    "Julian Jakob — Global Brand Designer",
-      about:   "Über mich — Julian Jakob",
-      process: "Prozess — Julian Jakob",
-      pricing: "Leistungen — Julian Jakob",
-      contact: "Kontakt — Julian Jakob",
-      legal:   "Impressum — Julian Jakob",
+      home:    "Julian Jakob | Global Brand Designer",
+      about:   "Über mich | Julian Jakob",
+      process: "Prozess | Julian Jakob",
+      pricing: "Leistungen | Julian Jakob",
+      contact: "Kontakt | Julian Jakob",
+      legal:   "Impressum | Julian Jakob",
     };
     const map = lang === "de" ? titlesDe : titlesEn;
     let title = map[page] || titlesEn.home;
 
     if (page === "case" && caseTitleEl) {
       const caseTitle = caseTitleEl.textContent.trim();
-      if (caseTitle) title = `${caseTitle} — Julian Jakob`;
+      if (caseTitle) title = `${caseTitle} | Julian Jakob`;
     }
 
     document.title = title;
