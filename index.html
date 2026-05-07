@@ -100,7 +100,7 @@
     <header id="main-header">
         <a href="#" data-dest="home" class="brand type-ui-text nav-link">©julianjakob</a>
         <div style="display:flex;align-items:flex-start;gap:20px;">
-            <div id="lang-toggle" class="lang-toggle type-ui-text">DE</div>
+            <div id="lang-toggle" class="lang-toggle type-ui-text" role="button" aria-label="Switch language to German">DE</div>
             <div id="menu-btn" class="menu-trigger type-ui-text text-right"
                  data-en="Menu" data-de="Menü"
                  data-close-en="Close" data-close-de="Schließen">Menu</div>
@@ -130,13 +130,13 @@
     </div>
 
     <!-- HOME -->
-    <main id="page-home" class="page-container slider-container visible">
+    <main id="page-home" class="page-container slider-container visible" aria-hidden="false">
         <div class="home-loading type-ui-text"
              data-en="Loading projects…" data-de="Projekte werden geladen…">Loading projects…</div>
     </main>
 
     <!-- CASE -->
-    <main id="page-case" class="page-container case-container hidden">
+    <main id="page-case" class="page-container case-container hidden" aria-hidden="true">
         <div class="case-wrapper">
             <div class="case-header">
                 <h1 id="case-title" class="type-about-headline"></h1>
@@ -150,7 +150,7 @@
     </main>
 
     <!-- CONTACT -->
-    <main id="page-contact" class="page-container contact-container hidden">
+    <main id="page-contact" class="page-container contact-container hidden" aria-hidden="true">
         <div class="contact-wrapper">
             <div class="contact-group">
                 <h1 class="type-contact-header" data-en="Contact" data-de="Kontakt">Contact</h1>
@@ -184,7 +184,7 @@
     </main>
 
     <!-- ABOUT -->
-    <main id="page-about" class="page-container contact-container hidden">
+    <main id="page-about" class="page-container contact-container hidden" aria-hidden="true">
         <div class="contact-wrapper">
             <div class="contact-group">
                 <h1 class="type-about-headline"
@@ -244,7 +244,7 @@
     </main>
 
     <!-- PRICING -->
-    <main id="page-pricing" class="page-container contact-container hidden">
+    <main id="page-pricing" class="page-container contact-container hidden" aria-hidden="true">
         <div class="contact-wrapper">
             <div class="contact-group">
                 <h1 class="type-about-headline"
@@ -276,7 +276,7 @@
     </main>
 
     <!-- PROCESS -->
-    <main id="page-process" class="page-container contact-container hidden">
+    <main id="page-process" class="page-container contact-container hidden" aria-hidden="true">
         <div class="contact-wrapper">
             <div class="contact-group">
                 <h1 class="type-about-headline"
@@ -289,7 +289,7 @@
 
             <div class="contact-group">
                 <div class="contact-list">
-                    <div class="service-row expanded">
+                    <div class="service-row expanded" role="button" tabindex="0" aria-expanded="true">
                         <div class="service-header">
                             <div class="service-title-wrapper">
                                 <span class="type-service-title service-num">01</span>
@@ -309,7 +309,7 @@
                         </div>
                     </div>
 
-                    <div class="service-row expanded">
+                    <div class="service-row expanded" role="button" tabindex="0" aria-expanded="true">
                         <div class="service-header">
                             <div class="service-title-wrapper">
                                 <span class="type-service-title service-num">02</span>
@@ -329,7 +329,7 @@
                         </div>
                     </div>
 
-                    <div class="service-row expanded">
+                    <div class="service-row expanded" role="button" tabindex="0" aria-expanded="true">
                         <div class="service-header">
                             <div class="service-title-wrapper">
                                 <span class="type-service-title service-num">03</span>
@@ -349,7 +349,7 @@
                         </div>
                     </div>
 
-                    <div class="service-row expanded">
+                    <div class="service-row expanded" role="button" tabindex="0" aria-expanded="true">
                         <div class="service-header">
                             <div class="service-title-wrapper">
                                 <span class="type-service-title service-num">04</span>
@@ -384,7 +384,7 @@
     </main>
 
     <!-- LEGAL -->
-    <main id="page-legal" class="page-container contact-container hidden">
+    <main id="page-legal" class="page-container contact-container hidden" aria-hidden="true">
         <div class="contact-wrapper">
             <div class="contact-group">
                 <p class="type-contact-item">
@@ -501,7 +501,10 @@
 
         // Toggle label shows the OTHER language
         var toggle = document.getElementById("lang-toggle");
-        if (toggle) toggle.textContent = lang === "de" ? "EN" : "DE";
+        if (toggle) {
+          toggle.textContent = lang === "de" ? "EN" : "DE";
+          toggle.setAttribute("aria-label", lang === "de" ? "Switch language to English" : "Switch language to German");
+        }
 
         // Menu open: fix "Menu"→"Schließen"/"Close"
         var menuOverlay = document.getElementById("menu-overlay");

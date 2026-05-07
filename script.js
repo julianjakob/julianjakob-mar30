@@ -137,6 +137,7 @@ async function init() {
         activePage.style.transformOrigin = "bottom center";
         activePage.classList.remove("visible");
         activePage.classList.add("hidden");
+        activePage.setAttribute("aria-hidden", "true");
       }
     } else {
       menuOverlay.classList.remove("open");
@@ -167,6 +168,7 @@ async function init() {
         // Re-adding .visible mid-hide: CSS transitions back from current scaleY automatically
         activePage.classList.remove("hidden");
         activePage.classList.add("visible");
+        activePage.setAttribute("aria-hidden", "false");
       }
     }
     tLock.bump(950); // bump = cancel any in-flight timer + re-acquire
@@ -307,6 +309,7 @@ async function init() {
       oldPage.style.transformOrigin = oldOrigin;
       oldPage.classList.remove("visible");
       oldPage.classList.add("hidden");
+      oldPage.setAttribute("aria-hidden", "true");
     }
     if (newPage) {
       if (dest === "home") {
@@ -336,6 +339,7 @@ async function init() {
       }
       newPage.classList.remove("hidden");
       newPage.classList.add("visible");
+      newPage.setAttribute("aria-hidden", "false");
     }
 
     if (dest !== "home") flashMenuText(dest);
@@ -353,10 +357,16 @@ async function init() {
   initServicesAccordion();
   function initServicesAccordion() {
     document.querySelectorAll(".service-row").forEach((row) => {
-      row.addEventListener("click", () => {
+      const handleToggle = () => {
         row.classList.toggle("expanded");
+        const isExpanded = row.classList.contains("expanded");
         const toggle = row.querySelector(".service-toggle");
-        if (toggle) toggle.textContent = row.classList.contains("expanded") ? "−" : "+";
+        if (toggle) toggle.textContent = isExpanded ? "−" : "+";
+        row.setAttribute("aria-expanded", String(isExpanded));
+      };
+      row.addEventListener("click", handleToggle);
+      row.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleToggle(); }
       });
     });
   }
