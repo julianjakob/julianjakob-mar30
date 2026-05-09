@@ -685,7 +685,9 @@ span.mobile-only { display: inline; }
 }
 .contact-row:hover { opacity: 0.5; }
 .contact-list.no-lines { border-top: none; }
-.contact-list.no-lines .contact-row { border-bottom: none; padding: 0; margin-bottom: var(--spacing-xs); }
+.contact-list.no-lines .contact-row { border-bottom: none; padding: 0; margin-bottom: 2px; }
+.copy-row .type-contact-item { transition: opacity var(--transition-base); }
+.copy-link { cursor: pointer; transition: opacity var(--transition-base); }
 .about-portrait {
   width: 100%;
   max-width: var(--layout-width);
@@ -1057,4 +1059,245 @@ p.type-contact-item.service-description {
     --page-padding: 80px;
     --page-padding-top: 120px;
   }
+}
+
+/* ── CV Page ────────────────────────────────────────────────────── */
+
+/* ╔══════════════════════════════════════════════════════════════════
+   ║  CV SPACING — edit these 6 values to control every distance
+   ╠══════════════════════════════════════════════════════════════════
+   ║
+   ║  --cv-before-line        16px   space from content to rule above
+   ║  --cv-after-line         16px   space from rule to what follows
+   ║  --cv-before-headline     0px   extra gap before headline (stacks with after-line)
+   ║  --cv-after-headline     16px   headline → content  (Experience / Education)
+   ║  --cv-after-headline-sm   4px   headline → content  (sidebar sections + Intro)
+   ║  --cv-before-subheadline 16px   gap before each sub-headline
+   ║  --cv-after-subheadline   8px   sub-headline → body text
+   ║
+   ║  ─── Layout (not distances) ──────────────────────────────────
+   ║  --cv-page-pad-top  150px   grey space above card (matches --spacing-contact-vertical)
+   ║  --cv-page-pad-bot   80px   grey space below card
+   ║  --cv-card-pad-v     32px   card top/bottom padding (mobile)
+   ║  --cv-card-pad-h     24px   card left/right padding (mobile)
+   ║  --cv-card-pad-v-lg  48px   card top/bottom padding (desktop)
+   ║  --cv-card-pad-h-lg  56px   card left/right padding (desktop)
+   ║  --cv-sidebar-width 220px   sidebar column width
+   ║  --cv-col-gap        40px   gap between sidebar and main (desktop)
+   ║  --cv-stack-gap      32px   gap between stacked columns (mobile)
+   ║
+   ╚══════════════════════════════════════════════════════════════════ */
+.cv-container {
+  --cv-before-line:        16px;
+  --cv-after-line:         16px;
+  --cv-before-headline:     0px;
+  --cv-after-headline:     16px;
+  --cv-after-headline-sm:   8px;
+  --cv-before-subheadline: 16px;
+  --cv-after-subheadline:   8px;
+
+  --cv-page-pad-top:  150px;
+  --cv-page-pad-bot:   80px;
+
+  --cv-card-pad-v:     32px;
+  --cv-card-pad-h:     24px;
+  --cv-card-pad-v-lg:  48px;
+  --cv-card-pad-h-lg:  56px;
+
+  --cv-sidebar-width: 220px;
+  --cv-col-gap:        40px;
+  --cv-stack-gap:      32px;
+
+  background-color: #fff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior-y: none;
+  contain: paint;
+}
+
+.cv-outer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--cv-page-pad-top) var(--ui-padding-side) var(--cv-page-pad-bot);
+  flex: 1;
+}
+
+.cv-card {
+  font-family: var(--font-main);
+  background: #fff;
+  width: 100%;
+  max-width: 900px;
+  padding: var(--cv-card-pad-v) var(--cv-card-pad-h);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.09);
+}
+
+.cv-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cv-stack-gap);
+}
+
+/* Mobile: main content first, sidebar below */
+.cv-sidebar { order: 2; }
+.cv-main    { order: 1; }
+
+.cv-sidebar,
+.cv-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cv-before-line);
+}
+
+.cv-photo {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.cv-identity {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid #000;
+  padding-top: var(--cv-after-line);
+  gap: var(--cv-after-subheadline);
+}
+
+.cv-name {
+  font-family: var(--font-main);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  color: #000;
+}
+
+.cv-contact {
+  font-family: var(--font-main);
+  font-size: 13px;
+  line-height: 1.65;
+  color: #000;
+  margin: 0;
+}
+
+.cv-contact-links { margin-top: var(--cv-before-line); }
+
+.cv-copy-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--transition-base), opacity var(--transition-base);
+}
+.cv-copy-btn:hover { color: var(--text-grey); }
+
+.cv-section {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid #000;
+  padding-top: var(--cv-after-line);
+}
+
+.cv-sidebar .cv-section:last-child,
+.cv-main .cv-section:last-child {
+  border-bottom: 0.5px solid #000;
+  padding-bottom: var(--cv-before-line);
+}
+
+.cv-section-title {
+  font-family: var(--font-main);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  color: #000;
+  margin-top: var(--cv-before-headline);
+  margin-bottom: var(--cv-after-headline);
+}
+
+/* sidebar sections + Introduction get the smaller headline gap */
+.cv-sidebar .cv-section-title,
+.cv-intro .cv-section-title {
+  margin-bottom: var(--cv-after-headline-sm);
+}
+
+.cv-list {
+  list-style: disc;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cv-list li,
+.cv-contact,
+.cv-entry-head {
+  font-family: var(--font-main);
+  font-size: 13px;
+  line-height: 1.6;
+  color: #000;
+  margin: 0;
+}
+
+.cv-body {
+  font-family: var(--font-main);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-grey);
+  margin: 0;
+}
+
+.cv-grey { color: var(--text-grey); }
+
+.cv-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cv-after-subheadline);
+}
+
+.cv-entry + .cv-entry {
+  margin-top: var(--cv-before-subheadline);
+}
+
+.cv-entry-head { font-weight: 500; }
+.cv-entry-head strong { font-weight: 500; }
+
+.cv-date::before { content: ' | '; }
+
+.cv-intro .cv-body { color: #000; }
+
+@media (max-width: 639px) {
+  .cv-container {
+    --cv-page-pad-bot: 40px;
+    --cv-stack-gap: 0px;
+  }
+  .cv-photo { display: none; }
+  .cv-date { display: block; }
+  .cv-date::before { display: none; }
+  /* sidebar stacks below main — its first section's border-top duplicates the
+     border-bottom already on the last main section, so remove it */
+  .cv-sidebar > .cv-section:first-of-type { border-top: none; }
+}
+
+@media (min-width: 640px) {
+  .cv-card { padding: var(--cv-card-pad-v-lg) var(--cv-card-pad-h-lg); }
+
+  .cv-card-body {
+    display: grid;
+    grid-template-columns: var(--cv-sidebar-width) 1fr;
+    gap: var(--cv-col-gap);
+    align-items: start;
+  }
+
+  .cv-sidebar { order: 0; }
+  .cv-main    { order: 0; }
+
+  .cv-photo { max-width: none; }
 }

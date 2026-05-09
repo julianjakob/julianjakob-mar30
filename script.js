@@ -12,6 +12,7 @@ async function init() {
   const pageProcess = document.getElementById("page-process");
   const pagePricing = document.getElementById("page-pricing");
   const pageLegal = document.getElementById("page-legal");
+  const pageCv    = document.getElementById("page-cv");
 
   const banner = document.getElementById("intro-banner");
   const footerTitle = document.getElementById("footer-title");
@@ -31,6 +32,7 @@ async function init() {
     process: pageProcess,
     pricing: pagePricing,
     legal: pageLegal,
+    cv:    pageCv,
   };
   let currentPage = "home",
     currentIndex = 0,
@@ -239,6 +241,7 @@ async function init() {
       pricing: "Services | Julian Jakob",
       contact: "Contact | Julian Jakob",
       legal:   "Legal | Julian Jakob",
+      cv:      "CV | Julian Jakob",
     };
     const titlesDe = {
       home:    "Julian Jakob | Global Brand Designer",
@@ -247,6 +250,7 @@ async function init() {
       pricing: "Leistungen | Julian Jakob",
       contact: "Kontakt | Julian Jakob",
       legal:   "Impressum | Julian Jakob",
+      cv:      "CV | Julian Jakob",
     };
     const map = lang === "de" ? titlesDe : titlesEn;
     let title = map[page] || titlesEn.home;
@@ -1503,6 +1507,7 @@ function setHash(value, push = false) {
     "pricing": "/pricing",
     "contact": "/contact",
     "legal":   "/legal",
+    "cv":      "/cv",
   };
   let next;
   if (!value) {
@@ -1545,7 +1550,7 @@ function applyTypewriterEffect(elements, containerOverride) {
     // Per-character spans on justified text create huge gaps because the browser
     // distributes justification spacing between individual letter spans.
     // Word spans preserve correct justification while keeping the cascading feel.
-    if (el.matches("p.type-contact-item, .case-text, .case-intro-text, .case-outro, p.service-description")) {
+    if (el.getAttribute("data-typewriter") !== "char" && (el.tagName === "P" || el.matches(".case-text, .case-intro-text, .case-outro"))) {
       const wordDelay = 18; // ms per word — feels alive without being slow
 
       function revealWords(node, wordIndex) {
@@ -1653,3 +1658,65 @@ function applyTypewriterEffect(elements, containerOverride) {
     }
   });
 }
+
+// ── Copy to clipboard (CV buttons, contact rows, footer links) ───────────────
+(function () {
+  var FADE = 300; // matches --transition-base
+
+  function swap(el, content, isHTML, done) {
+    el.style.opacity = "0";
+    setTimeout(function () {
+      if (isHTML) { el.innerHTML = content; } else { el.textContent = content; }
+      el.style.opacity = "1";
+      if (done) setTimeout(done, FADE);
+    }, FADE);
+  }
+
+  function wire(trigger, label) {
+    var busy = false;
+    trigger.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (busy) return;
+      busy = true;
+      var text    = trigger.getAttribute("data-copy");
+      var original = label.innerHTML;
+      function show() {
+        var copied = (window.getCurrentLang && window.getCurrentLang() === "de") ? "Kopiert" : "Copied";
+        swap(label, copied, false, function () {
+          setTimeout(function () {
+            swap(label, original, true, function () { busy = false; });
+          }, 1200);
+        });
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(show).catch(show);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:-999px;left:-999px";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+        show();
+      }
+    });
+  }
+
+  function initCopy() {
+    document.querySelectorAll(".cv-copy-btn").forEach(function (btn) {
+      wire(btn, btn);
+    });
+    document.querySelectorAll(".copy-row[data-copy]").forEach(function (row) {
+      wire(row, row.querySelector(".type-contact-item") || row);
+    });
+    document.querySelectorAll(".copy-link[data-copy]").forEach(function (link) {
+      wire(link, link);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCopy);
+  } else {
+    initCopy();
+  }
+})();
