@@ -1301,3 +1301,25 @@ p.type-contact-item.service-description {
 
   .cv-photo { max-width: none; }
 }
+
+/* ── Scroll hint indicator ───────────────────────────────────── */
+#scroll-hint {
+  position: fixed;
+  left: var(--ui-padding-side);
+  right: var(--ui-padding-side);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  mix-blend-mode: difference;
+  font-family: var(--font-main);
+  font-size: var(--type-ui);
+  font-weight: 400;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+}
+.sh-arrow   { display: inline-block; }
+.sh-arrow-r { transform: rotate(180deg); }

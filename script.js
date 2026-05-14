@@ -71,7 +71,6 @@ async function init() {
       setTimeout(() => {
         banner.style.display = "none";
         hasSeenBanner = true;
-        // Schedule peek only for first-time visitors
         if (shouldShowPeek()) {
           markPeekShown();
           let peekTimer = null;
@@ -86,7 +85,7 @@ async function init() {
           window.addEventListener("keydown",    cancelEarly, { once: true });
           peekTimer = setTimeout(() => {
             removePeekListeners();
-            runPeekHint();
+            runScrollIndicator();
           }, 800);
         }
       }, 1000);
@@ -376,113 +375,94 @@ async function init() {
   }
 
 
-  // Abort token for runPeekHint — lets changeSlide cancel it instantly
-  let peekController = null;
+  // Scroll hint — shown once per visitor, dismissed on first interaction
+  let scrollHintActive = false;
 
   function abortPeek() {
-    if (!peekController) return;
-    peekController.cancelled = true;
-    peekController = null;
-    // Brute-force wipe all inline styles on every slide — safe because
-    // changeSlide immediately sets the inline transformOrigin it needs.
-    homeSlides.forEach(s => { s.style.cssText = ""; });
-    tLock.release();
+    if (!scrollHintActive) return;
+    scrollHintActive = false;
+    const hint = document.getElementById("scroll-hint");
+    if (hint) {
+      hint.style.transition = "opacity 0.3s ease-in";
+      hint.style.opacity    = "0";
+    }
   }
 
-  /* ─────────────────────────────────────────────
-     Image Peek Hint — fully interruptible
-     Active slide never touched — peek only.
-     Pull-back is slower than push-in so it feels
-     reluctant to leave, not mechanical.
-  ───────────────────────────────────────────── */
-  async function runPeekHint() {
+  async function runScrollIndicator() {
     if (homeSlides.length <= 1) return;
+    const hint = document.getElementById("scroll-hint");
+    if (!hint) return;
 
-    const PEEK_SCALE = 0.07;
-    const CURVE_IN   = "cubic-bezier(0.80, 0, 0.20, 1)";
-    const CURVE_OUT  = "cubic-bezier(0.80, 0, 0.20, 1)";
-    const SPEED_IN   = 520;
-    const SPEED_OUT  = 480;
-    const HOLD       = 380;
-    const GAP        = 340;
+    scrollHintActive = true;
 
-    const ctrl = { cancelled: false };
-    peekController = ctrl;
-    // NOTE: No tLock.acquire() here — the peek must not block user input.
-    // If the user swipes/scrolls during the hint, changeSlide() calls
-    // abortPeek() first, which cancels this animation and clears peekController,
-    // then proceeds with the real slide transition normally.
+    const HALF_DUR  = 650;   // center → first endpoint
+    const SWEEP_DUR = 920;   // endpoint → endpoint
+    const HOLD      = 120;   // pause at each end
+    const MOVE      = 55;    // px
+    const CURVE     = "cubic-bezier(0.34, 1.4, 0.64, 1)";
 
-    const nextIdx  = (currentIndex + 1) % homeSlides.length;
-    const prevIdx  = (currentIndex - 1 + homeSlides.length) % homeSlides.length;
-    const nextSlide = homeSlides[nextIdx];
-    const prevSlide = homeSlides[prevIdx];
+    const wait   = ms => new Promise(r => setTimeout(r, ms));
+    const alive  = () => scrollHintActive;
+    const arrowL = hint.querySelector(".sh-arrow-l");
+    const arrowR = hint.querySelector(".sh-arrow-r");
 
-    const wait = (ms) => new Promise((r) => {
-      const t = setTimeout(r, ms);
-      const check = () => { if (ctrl.cancelled) { clearTimeout(t); r(); } else requestAnimationFrame(check); };
-      requestAnimationFrame(check);
-    });
+    // Accumulated rotation values
+    let lRot = 0, rRot = 180; // inward: L→ R←
 
-    function prepPeekSlide(slide, origin) {
-      slide.style.transition      = "none";
-      slide.style.transform       = "scaleY(0)";
-      slide.style.transformOrigin = origin;
-      slide.style.opacity         = "1";
-      slide.style.zIndex          = "15"; // above active (z:10) — edge must be visible
-    }
+    const rotateArrows = (dl, dr) => {
+      lRot += dl; rRot += dr;
+      arrowL.style.transition = "none";
+      arrowR.style.transition = "none";
+      arrowL.style.transform  = `rotate(${lRot}deg)`;
+      arrowR.style.transform  = `rotate(${rRot}deg)`;
+    };
 
-    const activeSlide = homeSlides[currentIndex];
+    const move = (dur, dest) => {
+      hint.style.transition = `transform ${dur}ms ${CURVE}`;
+      hint.style.transform  = dest;
+    };
 
-    async function peekIn(slide, origin, activeOrigin) {
-      if (ctrl.cancelled) return;
-      slide.style.transformOrigin       = origin;
-      slide.style.transition            = `transform ${SPEED_IN}ms ${CURVE_IN}`;
-      slide.style.transform             = `scaleY(${PEEK_SCALE})`;
-      activeSlide.style.transformOrigin = activeOrigin;
-      activeSlide.style.transition      = `transform ${SPEED_IN}ms ${CURVE_IN}`;
-      activeSlide.style.transform       = "scaleY(0.93)";
-      await wait(SPEED_IN);
-    }
+    // Fade in (arrows already inward from CSS)
+    hint.style.transition = "opacity 350ms ease-out";
+    hint.style.opacity    = "1";
+    await wait(350);
+    if (!alive()) return;
 
-    async function peekOut(slide, origin, activeOrigin) {
-      if (ctrl.cancelled) return;
-      slide.style.transformOrigin       = origin;
-      slide.style.transition            = `transform ${SPEED_OUT}ms ${CURVE_OUT}`;
-      slide.style.transform             = "scaleY(0)";
-      activeSlide.style.transformOrigin = activeOrigin;
-      activeSlide.style.transition      = `transform ${SPEED_OUT}ms ${CURVE_OUT}`;
-      activeSlide.style.transform       = "scaleY(1)";
-      await wait(SPEED_OUT);
-    }
+    // Snap to UP + move to top
+    rotateArrows( -90, +90);
+    move(HALF_DUR, `translateY(calc(-50% - ${MOVE}px))`);
+    await wait(HALF_DUR + HOLD);
+    if (!alive()) return;
 
-    function resetPeek(slide) {
-      slide.style.cssText       = "";
-      activeSlide.style.cssText = "";
-    }
+    // Sweep DOWN
+    rotateArrows( +180, -180);
+    move(SWEEP_DUR, `translateY(calc(-50% + ${MOVE}px))`);
+    await wait(SWEEP_DUR + HOLD);
+    if (!alive()) return;
 
-    // ── Peek next (from below) ──
-    prepPeekSlide(nextSlide, "bottom center");
-    await wait(40);
-    await peekIn(nextSlide, "bottom center", "top center");
-    await wait(HOLD);
-    await peekOut(nextSlide, "bottom center", "top center");
-    if (ctrl.cancelled) return;
-    resetPeek(nextSlide);
+    // Sweep UP
+    rotateArrows( -180, +180);
+    move(SWEEP_DUR, `translateY(calc(-50% - ${MOVE}px))`);
+    await wait(SWEEP_DUR + HOLD);
+    if (!alive()) return;
 
-    await wait(GAP);
-    if (ctrl.cancelled) return;
+    // Sweep DOWN
+    rotateArrows( +180, -180);
+    move(SWEEP_DUR, `translateY(calc(-50% + ${MOVE}px))`);
+    await wait(SWEEP_DUR + HOLD);
+    if (!alive()) return;
 
-    // ── Peek prev (from above) ──
-    prepPeekSlide(prevSlide, "top center");
-    await wait(40);
-    await peekIn(prevSlide, "top center", "bottom center");
-    await wait(HOLD);
-    await peekOut(prevSlide, "top center", "bottom center");
-    if (ctrl.cancelled) return;
-    resetPeek(prevSlide);
+    // Snap back to inward + return to center
+    rotateArrows( -90, +90);
+    move(HALF_DUR, "translateY(-50%)");
+    await wait(HALF_DUR);
+    if (!alive()) return;
 
-    peekController = null;
+    // Fade out
+    hint.style.transition = "opacity 350ms ease-in";
+    hint.style.opacity    = "0";
+    await wait(350);
+    scrollHintActive = false;
   }
 
   function changeSlide(direction) {
